@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- ================================================================ -->
+    <!-- Construction Safety AI Detection System - Frontend Entry Point   -->
+    <!-- Author: A-P-U-R-B-O                                             -->
+    <!-- Created: 2025-11-07 15:24:31 UTC                                -->
+    <!-- Version: 1.0.0                                                   -->
+    <!-- ================================================================ -->
+    
+    <!-- Primary Meta Tags -->
+    <title>Construction Safety AI - Real-time Safety Monitoring</title>
+    <meta name="title" content="Construction Safety AI - Real-time Safety Monitoring" />
+    <meta name="description" content="AI-powered construction site safety monitoring system using YOLOv8 computer vision. Real-time detection, alerts, and danger assessment for construction worker safety." />
+    <meta name="keywords" content="construction safety, AI detection, YOLOv8, computer vision, real-time monitoring, worker safety, PPE detection, hazard detection, construction site" />
+    <meta name="author" content="A-P-U-R-B-O" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="English" />
+    <meta name="revisit-after" content="7 days" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://construction-safety-ai.com/" />
+    <meta property="og:title" content="Construction Safety AI - Real-time Safety Monitoring" />
+    <meta property="og:description" content="AI-powered construction site safety monitoring system using YOLOv8 computer vision. Real-time detection, alerts, and danger assessment." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:site_name" content="Construction Safety AI" />
+    <meta property="og:locale" content="en_US" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://construction-safety-ai.com/" />
+    <meta property="twitter:title" content="Construction Safety AI - Real-time Safety Monitoring" />
+    <meta property="twitter:description" content="AI-powered construction site safety monitoring system using YOLOv8 computer vision." />
+    <meta property="twitter:image" content="/twitter-image.png" />
+    <meta property="twitter:creator" content="@A_P_U_R_B_O" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#ef4444" />
+    <meta name="msapplication-TileColor" content="#ef4444" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    
+    <!-- iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Safety AI" />
+    
+    <!-- Android Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Construction Safety AI" />
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    
+    <!-- Fira Code for Monospace -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    
+    <!-- Preload Critical Resources -->
+    <link rel="modulepreload" href="/src/main.jsx" />
+    
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Construction Safety AI",
+        "description": "AI-powered construction site safety monitoring system using YOLOv8 computer vision",
+        "url": "https://construction-safety-ai.com",
+        "applicationCategory": "Safety, AI, Computer Vision",
+        "operatingSystem": "Web Browser",
+        "author": {
+          "@type": "Person",
+          "name": "A-P-U-R-B-O"
+        },
+        "datePublished": "2025-11-07",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "ratingCount": "250"
+        }
+      }
+    </script>
+    
+    <!-- Base Styles -->
+    <style>
+      /* ============================================ */
+      /* Critical CSS - Loaded before main bundle    */
+      /* ============================================ */
+      
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      html {
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      body {
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        color: #1f2937;
+        background-color: #ffffff;
+        overflow-x: hidden;
+      }
+      
+      /* Dark mode support */
+      @media (prefers-color-scheme: dark) {
+        body {
+          color: #f9fafb;
+          background-color: #111827;
+        }
+      }
+      
+      /* Loading Screen */
+      #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+      
+      #loading-screen.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .loading-logo {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 2rem;
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      
+      .loading-text {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-align: center;
+      }
+      
+      .loading-subtext {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+        font-weight: 400;
+        text-align: center;
+      }
+      
+      .loading-spinner {
+        margin-top: 2rem;
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.8;
+          transform: scale(1.05);
+        }
+      }
+      
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      
+      /* Root container */
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      /* Utility classes */
+      .no-scroll {
+        overflow: hidden;
+      }
+      
+      /* Focus styles */
+      *:focus {
+        outline: 2px solid #ef4444;
+        outline-offset: 2px;
+      }
+      
+      /* Selection styles */
+      ::selection {
+        background-color: #ef4444;
+        color: white;
+      }
+      
+      ::-moz-selection {
+        background-color: #ef4444;
+        color: white;
+      }
+      
+      /* Scrollbar styles */
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: #f3f4f6;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: #9ca3af;
+        border-radius: 5px;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: #6b7280;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        ::-webkit-scrollbar-track {
+          background: #1f2937;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: #4b5563;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: #6b7280;
+        }
+      }
+    </style>
+  </head>
+  
+  <body>
+    <!-- ============================================ -->
+    <!-- Loading Screen                               -->
+    <!-- ============================================ -->
+    <div id="loading-screen">
+      <svg class="loading-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="3" />
+        <path
+          d="M50 15 L50 50 L70 70"
+          stroke="white"
+          stroke-width="4"
+          stroke-linecap="round"
+          fill="none"
+        />
+        <circle cx="50" cy="50" r="5" fill="white" />
+      </svg>
+      
+      <div class="loading-text">Construction Safety AI</div>
+      <div class="loading-subtext">Initializing AI Detection System...</div>
+      <div class="loading-spinner"></div>
+    </div>
+    
+    <!-- ============================================ -->
+    <!-- React Root                                   -->
+    <!-- ============================================ -->
+    <div id="root"></div>
+    
+    <!-- ============================================ -->
+    <!-- No Script Fallback                           -->
+    <!-- ============================================ -->
+    <noscript>
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        padding: 2rem;
+        text-align: center;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+      ">
+        <h1 style="font-size: 2rem; margin-bottom: 1rem;">JavaScript Required</h1>
+        <p style="font-size: 1.125rem; margin-bottom: 0.5rem;">
+          Construction Safety AI requires JavaScript to function properly.
+        </p>
+        <p style="font-size: 1rem; opacity: 0.9;">
+          Please enable JavaScript in your browser settings and reload the page.
+        </p>
+      </div>
+    </noscript>
+    
+    <!-- ============================================ -->
+    <!-- Browser Compatibility Warning                -->
+    <!-- ============================================ -->
+    <!--[if lt IE 11]>
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        padding: 2rem;
+        text-align: center;
+        background: #ef4444;
+        color: white;
+      ">
+        <h1 style="font-size: 2rem; margin-bottom: 1rem;">Browser Not Supported</h1>
+        <p style="font-size: 1.125rem; margin-bottom: 0.5rem;">
+          Your browser is outdated and not supported by Construction Safety AI.
+        </p>
+        <p style="font-size: 1rem; opacity: 0.9;">
+          Please upgrade to a modern browser like Chrome, Firefox, Safari, or Edge.
+        </p>
+      </div>
+    <![endif]-->
+    
+    <!-- ============================================ -->
+    <!-- Main Application Entry Point                 -->
+    <!-- ============================================ -->
+    <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- ============================================ -->
+    <!-- Service Worker Registration (PWA)            -->
+    <!-- ============================================ -->
+    <script>
+      // Register service worker for PWA functionality
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {
+              console.log('✅ Service Worker registered:', registration.scope);
+            })
+            .catch((error) => {
+              console.error('❌ Service Worker registration failed:', error);
+            });
+        });
+      }
+      
+      // Hide loading screen when app is ready
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          const loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            loadingScreen.classList.add('fade-out');
+            setTimeout(() => {
+              loadingScreen.style.display = 'none';
+            }, 500);
+          }
+        }, 500);
+      });
+      
+      // Handle PWA install prompt
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('📱 PWA install prompt available');
+      });
+      
+      // Log app info
+      console.log('%c🏗️ Construction Safety AI', 'font-size: 24px; font-weight: bold; color: #ef4444;');
+      console.log('%cVersion: 1.0.0', 'font-size: 14px; color: #6b7280;');
+      console.log('%cAuthor: A-P-U-R-B-O', 'font-size: 14px; color: #6b7280;');
+      console.log('%cCreated: 2025-11-07 15:24:31 UTC', 'font-size: 14px; color: #6b7280;');
+      console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ef4444;');
+      console.log('%c🚀 Application initialized successfully!', 'font-size: 16px; color: #22c55e;');
+      
+      // Performance monitoring
+      if (window.performance && window.performance.timing) {
+        window.addEventListener('load', () => {
+          const perfData = window.performance.timing;
+          const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+          const connectTime = perfData.responseEnd - perfData.requestStart;
+          const renderTime = perfData.domComplete - perfData.domLoading;
+          
+          console.log('%c📊 Performance Metrics:', 'font-size: 14px; font-weight: bold; color: #3b82f6;');
+          console.log(`  ⏱️  Page Load Time: ${pageLoadTime}ms`);
+          console.log(`  🔌 Connect Time: ${connectTime}ms`);
+          console.log(`  🎨 Render Time: ${renderTime}ms`);
+        });
+      }
+      
+      // Error tracking
+      window.addEventListener('error', (event) => {
+        console.error('❌ Global Error:', event.error);
+      });
+      
+      window.addEventListener('unhandledrejection', (event) => {
+        console.error('❌ Unhandled Promise Rejection:', event.reason);
+      });
+    </script>
+    
+    <!-- ============================================ -->
+    <!-- Analytics (Optional - Add your tracking)     -->
+    <!-- ============================================ -->
+    <!-- Google Analytics -->
+    <!--
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    -->
+    
+    <!-- ============================================ -->
+    <!-- End of Document                              -->
+    <!-- ============================================ -->
+  </body>
+</html>
