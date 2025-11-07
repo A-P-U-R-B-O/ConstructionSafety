@@ -596,3 +596,41 @@ class DetectionService:
                 vehicle_center = (
                     vehicle["bbox"]["center_x"],
                     vehicle["bbox"]
+)
+                
+                # Calculate distance
+                distance = np.sqrt(
+                    (person_center[0] - vehicle_center[0]) ** 2 +
+                    (person_center[1] - vehicle_center[1]) ** 2
+                )
+                
+                if distance <= max_distance_pixels:
+                    alerts.append({
+                        "type": "proximity_alert",
+                        "severity": "critical",
+                        "message": f"⚠️ DANGER: Person detected near {vehicle['class']}!",
+                        "distance_pixels": round(distance, 2),
+                        "person": person,
+                        "vehicle": vehicle,
+                        "timestamp": datetime.utcnow().isoformat()
+                    })
+        
+        return alerts
+    
+    def clear_cache(self):
+        """Clear detection cache and reset statistics"""
+        if self.cache:
+            self.cache.clear()
+        self.total_detections = 0
+        self.total_frames_processed = 0
+        self.recent_dangerous_objects.clear()
+        self.alert_cooldown.clear()
+        logger.info("Detection service cache cleared")
+    
+    def __repr__(self) -> str:
+        return (
+            f"DetectionService("
+            f"frames_processed={self.total_frames_processed}, "
+            f"total_detections={self.total_detections}, "
+            f"cache_enabled={self.enable_cache})"
+        )
