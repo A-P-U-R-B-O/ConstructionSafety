@@ -1,0 +1,529 @@
+# ============================================================================
+# Construction Safety AI Detection System - Docker Compose Configuration
+# Author: A-P-U-R-B-O
+# Created: 2025-11-07 13:33:04 UTC
+# Version: 1.0.0
+# ============================================================================
+
+version: '3.8'
+
+# ============================================================================
+# Services
+# ============================================================================
+
+services:
+  
+  # ========================================
+  # Backend API Service
+  # ========================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+    image: construction-safety-ai:latest
+    container_name: construction-safety-backend
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      # Application
+      - APP_NAME=Construction Safety AI Detection System
+      - APP_VERSION=1.0.0
+      - APP_AUTHOR=A-P-U-R-B-O
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - DEBUG=${DEBUG:-false}
+      
+      # Server
+      - HOST=0.0.0.0
+      - PORT=8000
+      - WORKERS=${WORKERS:-4}
+      - RELOAD=${RELOAD:-false}
+      - BASE_URL=${BASE_URL:-http://localhost:8000}
+      
+      # Model
+      - MODEL_NAME=${MODEL_NAME:-yolov8n.pt}
+      - MODEL_DEVICE=${MODEL_DEVICE:-cpu}
+      - MODEL_CONFIDENCE_THRESHOLD=${MODEL_CONFIDENCE_THRESHOLD:-0.5}
+      - MODEL_IOU_THRESHOLD=${MODEL_IOU_THRESHOLD:-0.45}
+      - MODEL_MAX_DETECTIONS=${MODEL_MAX_DETECTIONS:-100}
+      - MODEL_INPUT_SIZE=${MODEL_INPUT_SIZE:-640}
+      
+      # Detection Service
+      - DETECTION_CACHE_ENABLED=${DETECTION_CACHE_ENABLED:-true}
+      - DETECTION_CACHE_SIZE=${DETECTION_CACHE_SIZE:-1000}
+      - DETECTION_RESIZE_ENABLED=${DETECTION_RESIZE_ENABLED:-true}
+      - DETECTION_MAX_WIDTH=${DETECTION_MAX_WIDTH:-640}
+      - DETECTION_MAX_HEIGHT=${DETECTION_MAX_HEIGHT:-480}
+      
+      # Alert Service
+      - ALERT_COOLDOWN_SECONDS=${ALERT_COOLDOWN_SECONDS:-5}
+      - ALERT_MAX_PER_FRAME=${ALERT_MAX_PER_FRAME:-5}
+      - ALERT_HISTORY_ENABLED=${ALERT_HISTORY_ENABLED:-true}
+      - ALERT_HISTORY_SIZE=${ALERT_HISTORY_SIZE:-1000}
+      
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_DIR=/app/logs
+      - LOG_JSON_ENABLED=${LOG_JSON_ENABLED:-false}
+      - LOG_FILE_ENABLED=${LOG_FILE_ENABLED:-true}
+      - LOG_CONSOLE_ENABLED=${LOG_CONSOLE_ENABLED:-true}
+      
+      # CORS
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      
+      # Performance
+      - CACHE_ENABLED=${CACHE_ENABLED:-true}
+      - CACHE_TTL_SECONDS=${CACHE_TTL_SECONDS:-300}
+      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED:-false}
+      
+      # WebSocket
+      - WS_MAX_CONNECTIONS=${WS_MAX_CONNECTIONS:-100}
+      - WS_DEFAULT_FPS=${WS_DEFAULT_FPS:-10}
+      
+      # Metadata
+      - CREATED_DATE=2025-11-07 13:33:04 UTC
+      - CREATED_BY=A-P-U-R-B-O
+    
+    volumes:
+      # Persistent data volumes
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+      - ./output_videos:/app/output_videos
+      - ./weights:/app/weights
+      - ./config:/app/config
+      
+      # Optional: Mount app code for development
+      # - ./app:/app/app
+    
+    networks:
+      - safety-network
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    
+    labels:
+      - "com.construction-safety.service=backend"
+      - "com.construction-safety.author=A-P-U-R-B-O"
+      - "com.construction-safety.version=1.0.0"
+      - "com.construction-safety.created=2025-11-07"
+
+
+  # ========================================
+  # Backend Development Service
+  # ========================================
+  backend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    image: construction-safety-ai:dev
+    container_name: construction-safety-backend-dev
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      - APP_NAME=Construction Safety AI [DEV]
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - HOST=0.0.0.0
+      - PORT=8000
+      - WORKERS=1
+      - RELOAD=true
+      - MODEL_NAME=yolov8n.pt
+      - MODEL_DEVICE=cpu
+      - LOG_LEVEL=DEBUG
+      - CORS_ORIGINS=*
+    
+    volumes:
+      # Mount source code for hot reload
+      - ./app:/app/app
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+      - ./output_videos:/app/output_videos
+      - ./config:/app/config
+    
+    networks:
+      - safety-network
+    
+    profiles:
+      - dev
+    
+    labels:
+      - "com.construction-safety.service=backend-dev"
+      - "com.construction-safety.author=A-P-U-R-B-O"
+
+
+  # ========================================
+  # Frontend Service (React + Vite)
+  # ========================================
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    image: construction-safety-frontend:latest
+    container_name: construction-safety-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+      - VITE_WS_URL=${VITE_WS_URL:-ws://localhost:8000}
+      - VITE_APP_TITLE=Construction Safety AI
+      - VITE_APP_AUTHOR=A-P-U-R-B-O
+    
+    volumes:
+      # Optional: Mount for development
+      # - ../frontend/src:/app/src
+      - frontend-node-modules:/app/node_modules
+    
+    networks:
+      - safety-network
+    
+    depends_on:
+      - backend
+    
+    profiles:
+      - frontend
+    
+    labels:
+      - "com.construction-safety.service=frontend"
+      - "com.construction-safety.author=A-P-U-R-B-O"
+
+
+  # ========================================
+  # Nginx Reverse Proxy (Optional)
+  # ========================================
+  nginx:
+    image: nginx:alpine
+    container_name: construction-safety-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+    
+    networks:
+      - safety-network
+    
+    depends_on:
+      - backend
+      - frontend
+    
+    profiles:
+      - nginx
+    
+    labels:
+      - "com.construction-safety.service=nginx"
+      - "com.construction-safety.author=A-P-U-R-B-O"
+
+
+  # ========================================
+  # Redis Cache (Optional)
+  # ========================================
+  redis:
+    image: redis:7-alpine
+    container_name: construction-safety-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-changeme}
+    
+    volumes:
+      - redis-data:/data
+    
+    networks:
+      - safety-network
+    
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    
+    profiles:
+      - cache
+    
+    labels:
+      - "com.construction-safety.service=redis"
+      - "com.construction-safety.author=A-P-U-R-B-O"
+
+
+  # ========================================
+  # PostgreSQL Database (Optional)
+  # ========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: construction-safety-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_DB=${POSTGRES_DB:-construction_safety}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    
+    networks:
+      - safety-network
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+    profiles:
+      - database
+    
+    labels:
+      - "com.construction-safety.service=postgres"
+      - "com.construction-safety.author=A-P-U-R-B-O"
+
+
+  # ========================================
+  # Prometheus Monitoring (Optional)
+  # ========================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: construction-safety-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    
+    networks:
+      - safety-network
+    
+    profiles:
+      - monitoring
+    
+    labels:
+      - "com.construction-safety.service=prometheus"
+      - "com.construction-safety.author=A-P-U-R-B-O"
+
+
+  # ========================================
+  # Grafana Dashboard (Optional)
+  # ========================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: construction-safety-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=
+    
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    
+    networks:
+      - safety-network
+    
+    depends_on:
+      - prometheus
+    
+    profiles:
+      - monitoring
+    
+    labels:
+      - "com.construction-safety.service=grafana"
+      - "com.construction-safety.author=A-P-U-R-B-O"
+
+
+# ============================================================================
+# Networks
+# ============================================================================
+
+networks:
+  safety-network:
+    driver: bridge
+    name: construction-safety-network
+    labels:
+      - "com.construction-safety.network=main"
+      - "com.construction-safety.author=A-P-U-R-B-O"
+
+
+# ============================================================================
+# Volumes
+# ============================================================================
+
+volumes:
+  # Frontend
+  frontend-node-modules:
+    name: construction-safety-frontend-node-modules
+  
+  # Cache
+  redis-data:
+    name: construction-safety-redis-data
+  
+  # Database
+  postgres-data:
+    name: construction-safety-postgres-data
+  
+  # Monitoring
+  prometheus-data:
+    name: construction-safety-prometheus-data
+  
+  grafana-data:
+    name: construction-safety-grafana-data
+
+
+# ============================================================================
+# Usage Instructions
+# ============================================================================
+#
+# Basic Commands:
+# ---------------
+#
+# Start all services:
+#   docker-compose up -d
+#
+# Start specific service:
+#   docker-compose up -d backend
+#
+# Start with profiles:
+#   docker-compose --profile dev up -d
+#   docker-compose --profile frontend up -d
+#   docker-compose --profile cache up -d
+#   docker-compose --profile database up -d
+#   docker-compose --profile monitoring up -d
+#
+# View logs:
+#   docker-compose logs -f
+#   docker-compose logs -f backend
+#
+# Stop all services:
+#   docker-compose down
+#
+# Stop and remove volumes:
+#   docker-compose down -v
+#
+# Rebuild and restart:
+#   docker-compose up -d --build
+#
+# Scale services:
+#   docker-compose up -d --scale backend=3
+#
+# Execute commands:
+#   docker-compose exec backend python -c "print('Hello')"
+#
+#
+# Development Setup:
+# ------------------
+#
+# Start backend in dev mode:
+#   docker-compose --profile dev up -d backend-dev
+#
+# Start backend + frontend:
+#   docker-compose --profile frontend up -d
+#
+# Start with all monitoring:
+#   docker-compose --profile monitoring up -d
+#
+#
+# Production Setup:
+# -----------------
+#
+# Start production stack:
+#   docker-compose up -d backend frontend nginx
+#
+# With caching:
+#   docker-compose --profile cache up -d
+#
+# Full production stack:
+#   docker-compose --profile frontend --profile cache --profile database up -d
+#
+#
+# Health Checks:
+# --------------
+#
+# Check service health:
+#   docker-compose ps
+#
+# View backend health:
+#   curl http://localhost:8000/health
+#
+# View detailed health:
+#   curl http://localhost:8000/health/detailed
+#
+#
+# GPU Support:
+# ------------
+#
+# To use GPU (NVIDIA), add to backend service:
+#   deploy:
+#     resources:
+#       reservations:
+#         devices:
+#           - driver: nvidia
+#             count: 1
+#             capabilities: [gpu]
+#
+# And set: MODEL_DEVICE=cuda
+#
+#
+# Environment Variables:
+# ----------------------
+#
+# Create .env file with:
+#   ENVIRONMENT=production
+#   DEBUG=false
+#   MODEL_NAME=yolov8n.pt
+#   MODEL_DEVICE=cpu
+#   WORKERS=4
+#   LOG_LEVEL=INFO
+#
+#
+# Service URLs:
+# -------------
+#
+# Backend API:       http://localhost:8000
+# API Docs:          http://localhost:8000/docs
+# Frontend:          http://localhost:3000
+# Nginx:             http://localhost:80
+# Redis:             localhost:6379
+# PostgreSQL:        localhost:5432
+# Prometheus:        http://localhost:9090
+# Grafana:           http://localhost:3001
+#
+# ============================================================================
+# Author: A-P-U-R-B-O
+# Created: 2025-11-07 13:33:04 UTC
+# Version: 1.0.0
+# ============================================================================
