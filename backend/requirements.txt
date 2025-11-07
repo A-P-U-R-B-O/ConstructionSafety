@@ -1,0 +1,119 @@
+# ============================================================================
+# Construction Safety AI Detection System - Python Dependencies
+# Author: A-P-U-R-B-O
+# Created: 2025-11-07 13:24:18 UTC
+# Python Version: 3.9+
+# ============================================================================
+
+# ========================================
+# Core Web Framework
+# ========================================
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# ========================================
+# YOLO & Computer Vision
+# ========================================
+ultralytics==8.1.11
+opencv-python==4.9.0.80
+opencv-python-headless==4.9.0.80
+torch==2.1.2
+torchvision==0.16.2
+
+# ========================================
+# Image Processing
+# ========================================
+Pillow==10.2.0
+numpy==1.26.3
+scipy==1.11.4
+
+# ========================================
+# HTTP & WebSocket
+# ========================================
+httpx==0.26.0
+websockets==12.0
+python-multipart==0.0.6
+aiofiles==23.2.1
+
+# ========================================
+# Data Validation & Serialization
+# ========================================
+pydantic==2.5.3
+python-dateutil==2.8.2
+pytz==2024.1
+
+# ========================================
+# Logging
+# ========================================
+python-json-logger==2.0.7
+colorlog==6.8.2
+
+# ========================================
+# Environment & Configuration
+# ========================================
+python-dotenv==1.0.0
+
+# ========================================
+# System Monitoring
+# ========================================
+psutil==5.9.8
+
+# ========================================
+# Utilities
+# ========================================
+python-slugify==8.0.1
+requests==2.31.0
+
+# ========================================
+# Testing (Optional - Development)
+# ========================================
+pytest==7.4.4
+pytest-asyncio==0.23.3
+pytest-cov==4.1.0
+httpx==0.26.0  # For testing async endpoints
+
+# ========================================
+# Code Quality (Optional - Development)
+# ========================================
+black==23.12.1
+flake8==7.0.0
+mypy==1.8.0
+isort==5.13.2
+
+# ========================================
+# Documentation (Optional)
+# ========================================
+mkdocs==1.5.3
+mkdocs-material==9.5.3
+
+# ========================================
+# Additional ML/AI Libraries (Optional)
+# ========================================
+scikit-learn==1.4.0
+pandas==2.1.4
+
+# ========================================
+# Production Server (Alternative to uvicorn)
+# ========================================
+gunicorn==21.2.0
+
+# ========================================
+# Security
+# ========================================
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# ========================================
+# CORS & Middleware
+# ========================================
+# (Included in FastAPI)
+
+# ============================================================================
+# Notes:
+# - Install with: pip install -r requirements.txt
+# - For GPU support, install torch with CUDA:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+# - Development dependencies are optional for production
+# ============================================================================
