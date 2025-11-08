@@ -57,7 +57,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 FROM base as dependencies
 
 # Copy requirements file
-COPY requirements.txt .
+COPY backend/requirements.txt .
 
 # Upgrade pip
 RUN pip install --upgrade pip setuptools wheel
@@ -78,10 +78,10 @@ FROM dependencies as application
 RUN mkdir -p /app/logs /app/uploads /app/output_videos /app/weights
 
 # Copy application code
-COPY ./app /app/app
+COPY backend/app /app/app
 
 # Copy configuration files
-COPY .env.example /app/.env.example
+COPY backend/.env.example /app/.env.example
 
 # Set file permissions
 RUN chmod -R 755 /app && \
