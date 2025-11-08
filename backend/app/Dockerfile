@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     libxrender-dev \
     libgomp1 \
-    libgl1-mesa-glx \
+    libgl1 \
     # Additional image processing libraries
     libjpeg-dev \
     libpng-dev \
